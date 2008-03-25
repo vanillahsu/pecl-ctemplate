@@ -1,0 +1,40 @@
+Version 1.1 (2007/06/24)
+- move all escape functor to array.
+
+Version 1.0 (2007/03/05)
+- Move to php5's object system.
+- Add new escape-functor (url_query_escape and pre_escape).
+
+Version 0.8 (2006/09/25)
+- Fix addinclude & addsection.
+
+Version 0.7 (2006/09/12)
+- Autodetect thread/non-thread library.
+- Add JSON_ESCAPE escape-functor
+
+Version 0.6 (2006/07/07)                                                        
+- Fix the weak value detect on setvalue.                                                                                                                        Version 0.5 (2006/07/xx)                                                        - Add TemplateFromString support.                                               
+
+Version 0.4 (2006/05/21)
+- Will trim filename on $dict->filename ($var), when $var has whitespace on
+the front or end (thanks Gareth Ardron <gareth_at_fission.org.uk>)
+- merge and rename functions
+
+    ctemplate_setrootpath merge to ctemplate, as the third argument (option).
+    $dict->setname to $dict->set
+    $dict->setescapedvalue to $dict->setescaped
+    $dict->setglobalvalue to $dict->setglobal
+    $dict->showsection to $dict->show
+    $dict->setvalueandshowsection merge to $dict->set, section name will be the third argument (option).
+    $dict->setescapedvalueandshowsection merge to $dict->setescaped, section name will be the 4th argument (option).
+    $dict->setfilename to $dict->filename.
+
+Version 0.3 (2006/05/15)
+- Fix on php4 (thanks Pedram N. <zenstyle_at_gmail.com>).
+- Fix variable define (thanks Pedram N. <zenstyle_at_gmail.com>)
+
+Version 0.2 (2006/05/08)
+
+- use "new object()" style.
+- function name change: move gct_*() to ctemplate_* ().
+- function name change: gct() to "new ctemplate ();".
