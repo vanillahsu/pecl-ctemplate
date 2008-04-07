@@ -38,8 +38,8 @@ echo $out;
 ===DONE===
 --EXPECTF--
 Hello John Smith,
-   You have just won $#%d!
-   Well, $#%d, after taxes.
+   You have just won $ #%d!
+   Well, $ #%d, after taxes.
 <blockquota>
 0
 \x3cscript\x3ehttp://fatpipi.com/1.php?tes\x3c/script\x3e
