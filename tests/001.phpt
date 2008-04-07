@@ -19,6 +19,6 @@ echo $out;
 ===DONE===
 --EXPECTF--
 Hello John Smith,
-   You have just won $#%d!
-   Well, $#%d, after taxes.
+   You have just won $%d!
+   Well, $%f, after taxes.
 ===DONE===
