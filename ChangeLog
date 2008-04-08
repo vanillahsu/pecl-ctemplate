@@ -1,3 +1,7 @@
+Version 1.2 (2008/04/08)
+- tpl->Expand can accept php native array,
+  tests/004.phpt will be a nice example.
+
 Version 1.1 (2007/06/24)
 - move all escape functor to array.
 
