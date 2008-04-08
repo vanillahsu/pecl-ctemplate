@@ -2,7 +2,7 @@
  *   +----------------------------------------------------------------------+
      | PHP Version 5                                                        |
      +----------------------------------------------------------------------+
-     | Copyright (c) 2006,2007 San Tai (Vanilla) Hsu                        |
+     | Copyright (c) 2006,2007,2008 San Tai (Vanilla) Hsu                        |
      +----------------------------------------------------------------------+
      | This source file is subject to the BSD license, that is bundled with |
      | this package in the file LICENSE                                     |

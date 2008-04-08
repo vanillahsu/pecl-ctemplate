@@ -8,6 +8,6 @@
 	$value = sprintf ("%.2f", $winnings * 0.83);
 	$dict->set ("TAXED_VALUE", $value);
 
-	$out = $tpl->expand ($dict);
+    $out = $tpl->expand ($dict);
 	echo $out;
 ?>
