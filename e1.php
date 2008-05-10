@@ -11,7 +11,7 @@ Hello {{NAME}},
 {{/ONE_RESULT}}
 EOT;
 
-	$tpl = new cTemplate ("test", $a, STRIP_BLANK_LINES);
+	$tpl = new cTemplate ("test", $a, STRIP_BLANK_LINES, TC_HTML);
 	$dict = new cTemplate_Dict ();
 	$dict->Set ("NAME", "John Smith");
 	$winnings = rand() % 100000;
@@ -24,7 +24,7 @@ EOT;
 		$one = $dict->AddSection ("ONE_RESULT");
 		$one->Set ("I", $i);
 		$one->Show ("SUBITEM_SECTION");
-		$one->SetEscaped ("JUMP_TO_URL", "<script>http://fatpipi.com/1.php?tes</script>", JAVASCRIPT_ESCAPE);
+		$one->Set ("JUMP_TO_URL", "<script>http://fatpipi.com/1.php?tes</script>");
 	}
 
 	$out = $tpl->Expand ($dict);

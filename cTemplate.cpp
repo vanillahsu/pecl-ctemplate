@@ -184,11 +184,15 @@ PHP_MINIT_FUNCTION(cTemplate)
     REGISTER_LONG_CONSTANT ("STRIP_BLANK_LINES", STRIP_BLANK_LINES, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("STRIP_WHITESPACE", STRIP_WHITESPACE, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("NUM_STRIPS", NUM_STRIPS, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT ("TS_UNUSED", TS_UNUSED, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("TS_EMPTY", TS_EMPTY, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("TS_ERROR", TS_ERROR, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("TS_READY", TS_READY, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("TS_SHOULD_RELOAD", TS_SHOULD_RELOAD, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("TC_HTML", TC_HTML, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("TC_JS", TC_JS, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("TC_CSS", TC_CSS, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("TC_JSON", TC_JSON, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("TC_XML", TC_XML, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("HTML_ESCAPE", 0, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("XML_ESCAPE", 1, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("JAVASCRIPT_ESCAPE", 2, CONST_CS | CONST_PERSISTENT);
@@ -237,23 +241,29 @@ PHP_FUNCTION(cTemplate_clearcache)
 
 PHP_METHOD (cTemplateTpl, __construct)
 {
-    zval *object = getThis(), *arg1 = NULL, *arg2 = NULL, *arg3 = NULL;
+    zval *object = getThis(), *arg1 = NULL, *arg2 = NULL, *arg3 = NULL, *arg4 = NULL;
     php_cTemplateTpl *tpl = NULL;
 
 
-    if (zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "zz|z", &arg1, &arg2, &arg3) == FAILURE)
+    if (zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "zz|zz", &arg1, &arg2, &arg3, &arg4) == FAILURE)
         RETURN_FALSE;
 
     if (Z_TYPE_P (arg2) == IS_LONG)
     {
         tpl = (php_cTemplateTpl*) zend_object_store_get_object(object TSRMLS_CC);
-        if (ZEND_NUM_ARGS() == 2)
-            Template::SetTemplateRootDirectory ("./");
-        else
+
+        if (ZEND_NUM_ARGS() >= 3 && Z_TYPE_P (arg3) == IS_STRING)
             Template::SetTemplateRootDirectory (Z_STRVAL_P (arg3));
+        else
+            Template::SetTemplateRootDirectory ("./");
 
         tpl->obj = new cTemplateTpl;
-        tpl->obj->t = Template::GetTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg2));
+
+        if (ZEND_NUM_ARGS() == 4 && Z_TYPE_P (arg4) == IS_LONG)
+            tpl->obj->t = Template::GetTemplateWithAutoEscaping (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg2), (TemplateContext) Z_LVAL_P(arg4));
+        else
+            tpl->obj->t = Template::GetTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg2));
+
         if (tpl->obj->t == NULL)
         {
             zend_throw_exception (zend_exception_get_default(TSRMLS_C), "get template fail", 0 TSRMLS_CC);
@@ -269,7 +279,11 @@ PHP_METHOD (cTemplateTpl, __construct)
         Template::SetTemplateRootDirectory ("./");
 
         tpl->obj = new cTemplateTpl;
-        tpl->obj->s = TemplateFromString::GetTemplate (Z_STRVAL_P (arg1), Z_STRVAL_P (arg2), (Strip) Z_LVAL_P (arg3));
+
+        if (ZEND_NUM_ARGS() == 4 && Z_TYPE_P (arg4) == IS_LONG)
+            tpl->obj->s = TemplateFromString::GetTemplateWithAutoEscaping (Z_STRVAL_P (arg1), Z_STRVAL_P (arg2), (Strip) Z_LVAL_P (arg3), (TemplateContext) Z_LVAL_P (arg4));
+        else
+            tpl->obj->s = TemplateFromString::GetTemplate (Z_STRVAL_P (arg1), Z_STRVAL_P (arg2), (Strip) Z_LVAL_P (arg3));
 
         if (tpl->obj->s == NULL)
         {
