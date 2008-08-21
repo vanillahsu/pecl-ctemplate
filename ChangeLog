@@ -1,9 +1,14 @@
+Version 1.4 (2008/08/21)
+- Make compatible with google cTemplate 0.91.
+- Add new escape-functor (snippet_escape, validate_url_and_html_escape,
+validate_url_and_javascript_escape)
+
 Version 1.3 (2008/05/10)
 - Add AutoEscaping support.
 
 Version 1.2 (2008/04/08)
 - tpl->Expand can accept php native array,
-  tests/004.phpt will be a nice example.
+- tests/004.phpt will be a nice example.
 
 Version 1.1 (2007/06/24)
 - move all escape functor to array.
@@ -19,8 +24,11 @@ Version 0.7 (2006/09/12)
 - Autodetect thread/non-thread library.
 - Add JSON_ESCAPE escape-functor
 
-Version 0.6 (2006/07/07)                                                        
-- Fix the weak value detect on setvalue.                                                                                                                        Version 0.5 (2006/07/xx)                                                        - Add TemplateFromString support.                                               
+Version 0.6 (2006/07/07)
+- Fix the weak value detect on setvalue.
+
+Version 0.5 (2006/07/xx)
+- Add TemplateFromString support.
 
 Version 0.4 (2006/05/21)
 - Will trim filename on $dict->filename ($var), when $var has whitespace on

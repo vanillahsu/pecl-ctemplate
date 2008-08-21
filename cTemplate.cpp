@@ -39,8 +39,6 @@ class cTemplateTpl
 {
 public:
     Template *t;
-    TemplateFromString *s;
-    unsigned int is_from_string:1;
 
     cTemplateTpl();
     ~cTemplateTpl();
@@ -57,15 +55,12 @@ public:
     ~cTemplateDict();
 };
 
-cTemplateTpl::cTemplateTpl () : t (), s (), is_from_string (0)
+cTemplateTpl::cTemplateTpl () : t ()
 {
 }
 
 cTemplateTpl::~cTemplateTpl ()
 {
-    if (s)
-        s->ClearCache ();
-
     if (t)
         t->ClearCache ();
 }
@@ -102,6 +97,9 @@ static minfo m[] = {
     { &template_modifiers::json_escape },
     { &template_modifiers::url_query_escape },
     { &template_modifiers::pre_escape },
+    { &template_modifiers::snippet_escape },
+    { &template_modifiers::validate_url_and_html_escape },
+    { &template_modifiers::validate_url_and_javascript_escape },
     { NULL }
 };
 
@@ -153,7 +151,6 @@ zend_function_entry cTemplateDict_functions[] = {
     PHP_ME(cTemplateDict, Filename, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateDict, Dump, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateDict, DumpToString, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(cTemplateDict, SetAnnotateOutput, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateDict, __wakeup, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
     PHP_ME(cTemplateDict, __sleep, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
     { NULL, NULL, NULL }
@@ -193,12 +190,16 @@ PHP_MINIT_FUNCTION(cTemplate)
     REGISTER_LONG_CONSTANT ("TC_CSS", TC_CSS, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("TC_JSON", TC_JSON, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("TC_XML", TC_XML, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("TC_MANUAL", TC_MANUAL, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("HTML_ESCAPE", 0, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("XML_ESCAPE", 1, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("JAVASCRIPT_ESCAPE", 2, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("JSON_ESCAPE", 3, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("URL_ESCAPE", 4, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("PRE_ESCAPE", 5, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("SNIPPET_ESCAPE", 6, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("VALIDATE_URL_AND_HTML_ESCAPE", 7, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("VALIDATE_URL_AND_JAVASCRIPT_ESCAPE", 8, CONST_CS | CONST_PERSISTENT);
 
     cTemplateTpl_init (TSRMLS_C);
     cTemplateDict_init (TSRMLS_C);
@@ -269,8 +270,6 @@ PHP_METHOD (cTemplateTpl, __construct)
             zend_throw_exception (zend_exception_get_default(TSRMLS_C), "get template fail", 0 TSRMLS_CC);
             return;
         }
-        tpl->obj->s = NULL;
-        tpl->obj->is_from_string = 0;
         return;
     }
     else if (Z_TYPE_P (arg2) == IS_STRING)
@@ -280,18 +279,16 @@ PHP_METHOD (cTemplateTpl, __construct)
 
         tpl->obj = new cTemplateTpl;
 
-        if (ZEND_NUM_ARGS() == 4 && Z_TYPE_P (arg4) == IS_LONG)
-            tpl->obj->s = TemplateFromString::GetTemplateWithAutoEscaping (Z_STRVAL_P (arg1), Z_STRVAL_P (arg2), (Strip) Z_LVAL_P (arg3), (TemplateContext) Z_LVAL_P (arg4));
+        if (ZEND_NUM_ARGS() == 3)
+            tpl->obj->t = Template::RegisterStringAsTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg3), TC_MANUAL, Z_STRVAL_P (arg2), Z_STRLEN_P (arg2));
         else
-            tpl->obj->s = TemplateFromString::GetTemplate (Z_STRVAL_P (arg1), Z_STRVAL_P (arg2), (Strip) Z_LVAL_P (arg3));
+            tpl->obj->t = Template::RegisterStringAsTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg3), (TemplateContext) Z_LVAL_P (arg4), Z_STRVAL_P (arg2), Z_STRLEN_P (arg2));
 
-        if (tpl->obj->s == NULL)
+        if (tpl->obj->t == NULL)
         {
             zend_throw_exception(zend_exception_get_default(TSRMLS_C), "get template from string fail", 0 TSRMLS_CC);
             return;
         }
-        tpl->obj->t = NULL;
-        tpl->obj->is_from_string = 1;
         return;
     }
 
@@ -329,19 +326,9 @@ PHP_METHOD (cTemplateTpl, Expand)
         }
 
         if (dict->obj->is_root)
-        {
-            if (tpl->obj->is_from_string)
-                tpl->obj->s->Expand (&ret, &(dict->obj->d));
-            else
-                tpl->obj->t->Expand (&ret, &(dict->obj->d));
-        }
+            tpl->obj->t->Expand (&ret, &(dict->obj->d));
         else
-        {
-            if (tpl->obj->is_from_string)
-                tpl->obj->s->Expand (&ret, dict->obj->p);
-            else
-                tpl->obj->t->Expand (&ret, dict->obj->p);
-        }
+            tpl->obj->t->Expand (&ret, dict->obj->p);
         RETURN_STRINGL ((char *)ret.c_str(), ret.length(), 1);
     }
     else if (Z_TYPE_P (val) == IS_ARRAY)
@@ -390,10 +377,7 @@ PHP_METHOD (cTemplateTpl, Expand)
             }
         }
 
-        if (tpl->obj->is_from_string)
-            tpl->obj->s->Expand (&ret, &d);
-        else
-            tpl->obj->t->Expand (&ret, &d);
+        tpl->obj->t->Expand (&ret, &d);
         
         RETURN_STRINGL ((char *)ret.c_str(), ret.length(), 1);
     }
@@ -417,10 +401,7 @@ PHP_METHOD (cTemplateTpl, Dump)
         return;
     }
 
-    if (tpl->obj->is_from_string)
-        tpl->obj->s->Dump ("/dev/stdout");
-    else
-        tpl->obj->t->Dump ("/dev/stdout");
+    tpl->obj->t->Dump ("/dev/stdout");
 
     RETURN_TRUE;
 }
@@ -442,10 +423,7 @@ PHP_METHOD (cTemplateTpl, state)
         return;
     }
 
-    if (tpl->obj->is_from_string)
-        state = tpl->obj->s->state ();
-    else
-        state = tpl->obj->t->state ();
+    state = tpl->obj->t->state ();
 
     RETURN_LONG (state);
 }
@@ -466,14 +444,7 @@ PHP_METHOD (cTemplateTpl, template_file)
         return;
     }
 
-    if (tpl->obj->is_from_string)
-    {
-        RETURN_STRING ("", 1);
-    }
-    else
-    {
-        RETURN_STRING ((char *) tpl->obj->t->template_file(), 1);
-    }
+    RETURN_STRING ((char *) tpl->obj->t->template_file(), 1);
 }
 
 PHP_METHOD (cTemplateTpl, ReloadIfChanged)
@@ -493,10 +464,7 @@ PHP_METHOD (cTemplateTpl, ReloadIfChanged)
         return;
     }
 
-    if (tpl->obj->is_from_string)
-        b = true;
-    else
-        b = tpl->obj->t->ReloadIfChanged();
+    b = tpl->obj->t->ReloadIfChanged();
 
     RETURN_BOOL (b);
 }
@@ -518,10 +486,7 @@ PHP_METHOD (cTemplateTpl, WriteHeaderEntries)
         return;
     }
 
-    if (tpl->obj->is_from_string)
-        tpl->obj->s->WriteHeaderEntries (&ret);
-    else
-        tpl->obj->t->WriteHeaderEntries (&ret);
+    tpl->obj->t->WriteHeaderEntries (&ret);
 
     RETURN_STRINGL ((char *)ret.c_str(), ret.length(), 1);
 }
@@ -909,30 +874,6 @@ PHP_METHOD(cTemplateDict, DumpToString)
         dict->obj->p->DumpToString (&ret);
 
     RETURN_STRINGL ((char *)ret.c_str(), ret.length(), 1);
-}
-
-PHP_METHOD(cTemplateDict, SetAnnotateOutput)
-{
-    php_cTemplateDict *dict = NULL;
-    const char *path = NULL;
-    int path_len;
-
-    dict = (php_cTemplateDict *) zend_object_store_get_object (getThis() TSRMLS_CC);
-    if (dict->obj == NULL)
-    {
-        zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Dictionary object not exist", 0 TSRMLS_CC);
-        return;
-    }
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &path_len) == FAILURE)
-        RETURN_FALSE;
-
-    if (dict->obj->is_root)
-        dict->obj->d.SetAnnotateOutput (path);
-    else
-        dict->obj->p->SetAnnotateOutput (path);
-
-    RETURN_TRUE;
 }
 
 PHP_METHOD (cTemplateDict, __wakeup)
