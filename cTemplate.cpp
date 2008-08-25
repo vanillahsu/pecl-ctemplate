@@ -35,15 +35,6 @@ extern "C" {
 using namespace std;
 using namespace google;
 
-class cTemplateTpl
-{
-public:
-    Template *t;
-
-    cTemplateTpl();
-    ~cTemplateTpl();
-};
-
 class cTemplateDict
 {
 public:
@@ -54,16 +45,6 @@ public:
     cTemplateDict();
     ~cTemplateDict();
 };
-
-cTemplateTpl::cTemplateTpl () : t ()
-{
-}
-
-cTemplateTpl::~cTemplateTpl ()
-{
-    if (t)
-        t->ClearCache ();
-}
 
 cTemplateDict::cTemplateDict () : d ("default"), is_root (1)
 {
@@ -76,7 +57,7 @@ cTemplateDict::~cTemplateDict ()
 typedef struct
 {
     zend_object std;
-    cTemplateTpl *obj;
+    Template *obj;
 } php_cTemplateTpl;
 
 typedef struct
@@ -258,14 +239,12 @@ PHP_METHOD (cTemplateTpl, __construct)
         else
             Template::SetTemplateRootDirectory ("./");
 
-        tpl->obj = new cTemplateTpl;
-
         if (ZEND_NUM_ARGS() == 4 && Z_TYPE_P (arg4) == IS_LONG)
-            tpl->obj->t = Template::GetTemplateWithAutoEscaping (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg2), (TemplateContext) Z_LVAL_P(arg4));
+            tpl->obj = Template::GetTemplateWithAutoEscaping (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg2), (TemplateContext) Z_LVAL_P(arg4));
         else
-            tpl->obj->t = Template::GetTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg2));
+            tpl->obj = Template::GetTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg2));
 
-        if (tpl->obj->t == NULL)
+        if (tpl->obj == NULL)
         {
             zend_throw_exception (zend_exception_get_default(TSRMLS_C), "get template fail", 0 TSRMLS_CC);
             return;
@@ -277,14 +256,12 @@ PHP_METHOD (cTemplateTpl, __construct)
         tpl = (php_cTemplateTpl*) zend_object_store_get_object(object TSRMLS_CC);
         Template::SetTemplateRootDirectory ("./");
 
-        tpl->obj = new cTemplateTpl;
-
         if (ZEND_NUM_ARGS() == 3)
-            tpl->obj->t = Template::RegisterStringAsTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg3), TC_MANUAL, Z_STRVAL_P (arg2), Z_STRLEN_P (arg2));
+            tpl->obj = Template::RegisterStringAsTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg3), TC_MANUAL, Z_STRVAL_P (arg2), Z_STRLEN_P (arg2));
         else
-            tpl->obj->t = Template::RegisterStringAsTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg3), (TemplateContext) Z_LVAL_P (arg4), Z_STRVAL_P (arg2), Z_STRLEN_P (arg2));
+            tpl->obj = Template::RegisterStringAsTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg3), (TemplateContext) Z_LVAL_P (arg4), Z_STRVAL_P (arg2), Z_STRLEN_P (arg2));
 
-        if (tpl->obj->t == NULL)
+        if (tpl->obj == NULL)
         {
             zend_throw_exception(zend_exception_get_default(TSRMLS_C), "get template from string fail", 0 TSRMLS_CC);
             return;
@@ -326,9 +303,9 @@ PHP_METHOD (cTemplateTpl, Expand)
         }
 
         if (dict->obj->is_root)
-            tpl->obj->t->Expand (&ret, &(dict->obj->d));
+            tpl->obj->Expand (&ret, &(dict->obj->d));
         else
-            tpl->obj->t->Expand (&ret, dict->obj->p);
+            tpl->obj->Expand (&ret, dict->obj->p);
         RETURN_STRINGL ((char *)ret.c_str(), ret.length(), 1);
     }
     else if (Z_TYPE_P (val) == IS_ARRAY)
@@ -377,7 +354,7 @@ PHP_METHOD (cTemplateTpl, Expand)
             }
         }
 
-        tpl->obj->t->Expand (&ret, &d);
+        tpl->obj->Expand (&ret, &d);
         
         RETURN_STRINGL ((char *)ret.c_str(), ret.length(), 1);
     }
@@ -401,7 +378,7 @@ PHP_METHOD (cTemplateTpl, Dump)
         return;
     }
 
-    tpl->obj->t->Dump ("/dev/stdout");
+    tpl->obj->Dump ("/dev/stdout");
 
     RETURN_TRUE;
 }
@@ -423,7 +400,7 @@ PHP_METHOD (cTemplateTpl, state)
         return;
     }
 
-    state = tpl->obj->t->state ();
+    state = tpl->obj->state ();
 
     RETURN_LONG (state);
 }
@@ -444,7 +421,7 @@ PHP_METHOD (cTemplateTpl, template_file)
         return;
     }
 
-    RETURN_STRING ((char *) tpl->obj->t->template_file(), 1);
+    RETURN_STRING ((char *) tpl->obj->template_file(), 1);
 }
 
 PHP_METHOD (cTemplateTpl, ReloadIfChanged)
@@ -464,7 +441,7 @@ PHP_METHOD (cTemplateTpl, ReloadIfChanged)
         return;
     }
 
-    b = tpl->obj->t->ReloadIfChanged();
+    b = tpl->obj->ReloadIfChanged();
 
     RETURN_BOOL (b);
 }
@@ -486,7 +463,7 @@ PHP_METHOD (cTemplateTpl, WriteHeaderEntries)
         return;
     }
 
-    tpl->obj->t->WriteHeaderEntries (&ret);
+    tpl->obj->WriteHeaderEntries (&ret);
 
     RETURN_STRINGL ((char *)ret.c_str(), ret.length(), 1);
 }
@@ -891,7 +868,7 @@ static void cTemplateTpl_free_storage (void *object TSRMLS_DC)
     php_cTemplateTpl *tpl = (php_cTemplateTpl *)object;
 
     if (tpl->obj)
-        delete tpl->obj;
+        tpl->obj->ClearCache ();
 
     zend_object_std_dtor (&tpl->std TSRMLS_CC);
     efree(object);
