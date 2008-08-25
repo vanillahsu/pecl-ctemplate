@@ -1,3 +1,7 @@
+Version 1.5 (2008/08/25)
+- Remove uneeded code.
+- Fix pthread issue (ZTS support) on config.m4
+
 Version 1.4 (2008/08/21)
 - Make compatible with google cTemplate 0.91.
 - Add new escape-functor (snippet_escape, validate_url_and_html_escape,

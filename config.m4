@@ -21,16 +21,25 @@ if test "$PHP_CTEMPLATE" != "no"; then
   fi
 
   AC_MSG_CHECKING(for ZTS)
-  zts=""
+  no_zts=""
+
+  ac_save_CFLAGS="$CFLAGS"
+  PHP_CFLAGS=`$PHP_CONFIG --includes`
+  CFLAGS="$CFLAGS $PHP_CFLAGS"
  
   AC_TRY_RUN([
 #include "main/php_config.h"
 int main (void)
 {
-  return (!ZTS);
-}], no_zts=yes)
+#ifdef ZTS
+  return 0;
+#else
+  return 1;
+#endif
+}],, no_zts=yes)
+  CFLAGS="$ac_save_CFLAGS"
 
-  if test "x$zts" = "x" ; then
+  if test "x$no_zts" = "x" ; then
       AC_MSG_RESULT(yes)
       PHP_ADD_LIBRARY_WITH_PATH(ctemplate, $CTEMPLATE_DIR/lib, CTEMPLATE_SHARED_LIBADD)
   else

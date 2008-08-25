@@ -891,7 +891,7 @@ static zend_object_value cTemplateTpl_object_new_ex (zend_class_entry *ce, php_c
     php_cTemplateTpl *tpl = NULL;
     zval *tmp;
 
-    tpl = (php_cTemplateTpl *) emalloc (sizeof (*tpl));
+    tpl = (php_cTemplateTpl *) emalloc (sizeof (php_cTemplateTpl));
     memset (tpl, 0, sizeof (php_cTemplateTpl));
     if (ptr)
         *ptr = tpl;
