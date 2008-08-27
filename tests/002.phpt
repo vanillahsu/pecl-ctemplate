@@ -1,5 +1,5 @@
 --TEST--
-cTemplate: google cTemplate template engine
+cTemplate: template::from_string & template_dict::AddInclude test
 --SKIPIF--
 <?php if (!extension_loaded("cTemplate")) print "skip"; ?>
 --FILE--

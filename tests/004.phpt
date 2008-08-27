@@ -1,5 +1,5 @@
 --TEST--
-cTemplate: google cTemplate template engine
+cTemplate: template::from_string & template::expand with native array test
 --SKIPIF--
 <?php if (!extension_loaded("cTemplate")) print "skip"; ?>
 --FILE--
