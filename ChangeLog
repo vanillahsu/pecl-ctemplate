@@ -1,3 +1,8 @@
+Version 1.6 (2008/08/30)
+- Add 6 unit test scripts.
+- move static function out of cTemplate_dict object.
+- Add DumpToString() to cTemplate object.
+
 Version 1.5 (2008/08/25)
 - Remove uneeded code.
 - Fix pthread issue (ZTS support) on config.m4
