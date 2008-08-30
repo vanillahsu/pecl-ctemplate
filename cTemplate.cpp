@@ -103,6 +103,8 @@ static void _fill_dict (TemplateDictionary *d, HashTable *val, char *secName TSR
 zend_function_entry cTemplate_functions[] = {
     PHP_FE(cTemplate_reload, NULL)
     PHP_FE(cTemplate_clearcache, NULL)
+    PHP_FE(cTemplate_root_directory, NULL)
+    PHP_FE(cTemplateDict_SetGlobalValue, NULL)
     {NULL, NULL, NULL}
 };
 
@@ -110,6 +112,7 @@ zend_function_entry cTemplateTpl_functions[] = {
     PHP_ME(cTemplateTpl, __construct, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateTpl, Expand, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateTpl, Dump, NULL, ZEND_ACC_PUBLIC)
+    PHP_ME(cTemplateTpl, DumpToString, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateTpl, state, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateTpl, template_file, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateTpl, ReloadIfChanged, NULL, ZEND_ACC_PUBLIC)
@@ -124,7 +127,6 @@ zend_function_entry cTemplateDict_functions[] = {
     PHP_ME(cTemplateDict, SetArray, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateDict, Set, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateDict, SetEscaped, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(cTemplateDict, SetGlobal, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateDict, SetTemplateGlobal, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateDict, AddSection, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateDict, Show, NULL, ZEND_ACC_PUBLIC)
@@ -221,6 +223,33 @@ PHP_FUNCTION(cTemplate_clearcache)
     RETURN_TRUE;
 }
 
+PHP_FUNCTION(cTemplate_root_directory)
+{
+    string ret;
+
+    if (ZEND_NUM_ARGS() != 0)
+    {
+        WRONG_PARAM_COUNT;
+    }
+
+    ret = Template::template_root_directory();
+
+    RETURN_STRINGL ((char *)ret.c_str(), ret.length(), 1);
+}
+
+PHP_FUNCTION(cTemplateDict_SetGlobalValue)
+{
+    const char *key = NULL, *value = NULL;
+    long key_len, value_len;
+
+    if (zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "ss", &key, &key_len, &value, &value_len) == FAILURE)
+        RETURN_FALSE;
+
+    TemplateDictionary::SetGlobalValue(key, value);
+
+    RETURN_TRUE;
+}
+
 PHP_METHOD (cTemplateTpl, __construct)
 {
     zval *object = getThis(), *arg1 = NULL, *arg2 = NULL, *arg3 = NULL, *arg4 = NULL;
@@ -236,8 +265,6 @@ PHP_METHOD (cTemplateTpl, __construct)
 
         if (ZEND_NUM_ARGS() >= 3 && Z_TYPE_P (arg3) == IS_STRING)
             Template::SetTemplateRootDirectory (Z_STRVAL_P (arg3));
-        else
-            Template::SetTemplateRootDirectory ("./");
 
         if (ZEND_NUM_ARGS() == 4 && Z_TYPE_P (arg4) == IS_LONG)
             tpl->obj = Template::GetTemplateWithAutoEscaping (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg2), (TemplateContext) Z_LVAL_P(arg4));
@@ -365,6 +392,7 @@ PHP_METHOD (cTemplateTpl, Expand)
 PHP_METHOD (cTemplateTpl, Dump)
 {
     php_cTemplateTpl *tpl = NULL;
+    const char *filename = NULL;
 
     if (ZEND_NUM_ARGS() != 0)
     {
@@ -378,9 +406,42 @@ PHP_METHOD (cTemplateTpl, Dump)
         return;
     }
 
-    tpl->obj->Dump ("/dev/stdout");
+    filename = tpl->obj->template_file ();
+
+    if (strlen (filename) > 0)
+        tpl->obj->Dump (filename);
+    else
+        tpl->obj->Dump ("/dev/null");
 
     RETURN_TRUE;
+}
+
+PHP_METHOD (cTemplateTpl, DumpToString)
+{
+    php_cTemplateTpl *tpl = NULL;
+    const char *filename = NULL;
+    string ret;
+
+    if (ZEND_NUM_ARGS() != 0)
+    {
+        WRONG_PARAM_COUNT;
+    }
+
+    tpl = (php_cTemplateTpl *) zend_object_store_get_object (getThis() TSRMLS_CC);
+    if (tpl->obj == NULL)
+    {
+        zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Template object not exist", 0 TSRMLS_CC);
+        return;
+    }
+
+    filename = tpl->obj->template_file ();
+
+    if (strlen (filename) > 0)
+        tpl->obj->DumpToString (filename, &ret);
+    else
+        tpl->obj->DumpToString ("/dev/null", &ret);
+
+    RETURN_STRINGL ((char *)ret.c_str(), ret.length(), 1);
 }
 
 PHP_METHOD (cTemplateTpl, state)

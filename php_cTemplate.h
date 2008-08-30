@@ -34,10 +34,13 @@ PHP_MINFO_FUNCTION(cTemplate);
 
 PHP_FUNCTION(cTemplate_reload);
 PHP_FUNCTION(cTemplate_clearcache);
+PHP_FUNCTION(cTemplate_root_directory);
+PHP_FUNCTION(cTemplateDict_SetGlobalValue);
 
 PHP_METHOD(cTemplateTpl, __construct);
 PHP_METHOD(cTemplateTpl, Expand);
 PHP_METHOD(cTemplateTpl, Dump);
+PHP_METHOD(cTemplateTpl, DumpToString);
 PHP_METHOD(cTemplateTpl, state);
 PHP_METHOD(cTemplateTpl, template_file);
 PHP_METHOD(cTemplateTpl, ReloadIfChanged);
@@ -49,7 +52,6 @@ PHP_METHOD(cTemplateDict, __construct);
 PHP_METHOD(cTemplateDict, SetArray);
 PHP_METHOD(cTemplateDict, Set);
 PHP_METHOD(cTemplateDict, SetEscaped);
-PHP_METHOD(cTemplateDict, SetGlobal);
 PHP_METHOD(cTemplateDict, SetTemplateGlobal);
 PHP_METHOD(cTemplateDict, AddSection);
 PHP_METHOD(cTemplateDict, Show);

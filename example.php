@@ -9,5 +9,5 @@
 	$dict->set ("TAXED_VALUE", $value);
 
     $out = $tpl->expand ($dict);
-	echo $out;
+    echo $out;
 ?>
