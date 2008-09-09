@@ -11,22 +11,22 @@ Hello {{NAME}},
 {{/ONE_RESULT}}
 EOT;
 
-	$tpl = new cTemplate ("test", $a, STRIP_BLANK_LINES, TC_HTML);
-	$dict = new cTemplate_Dict ();
-	$dict->Set ("NAME", "John Smith");
-	$winnings = rand() % 100000;
-	$dict->Set ("VALUE", $winnings, "IN_CA");
-	$value = sprintf ("%.2f", $winnings * 0.83);
-	$dict->Set ("TAXED_VALUE", $value);
+$tpl = new cTemplate ("test", $a, STRIP_BLANK_LINES, TC_HTML);
+$dict = new cTemplate_Dict ();
+$dict->Set ("NAME", "John Smith");
+$winnings = rand() % 100000;
+$dict->Set ("VALUE", $winnings, "IN_CA");
+$value = sprintf ("%.2f", $winnings * 0.83);
+$dict->Set ("TAXED_VALUE", $value);
 
-	for ($i=0;$i<10;$i++)
-	{
-		$one = $dict->AddSection ("ONE_RESULT");
-		$one->Set ("I", $i);
-		$one->Show ("SUBITEM_SECTION");
-		$one->Set ("JUMP_TO_URL", "<script>http://fatpipi.com/1.php?tes</script>");
-	}
+for ($i=0;$i<10;$i++)
+{
+    $one = $dict->AddSection ("ONE_RESULT");
+    $one->Set ("I", $i);
+    $one->Show ("SUBITEM_SECTION");
+    $one->Set ("JUMP_TO_URL", "<script>http://fatpipi.com/1.php?tes</script>");
+}
 
-	$out = $tpl->Expand ($dict);
-	echo $out;
+$out = $tpl->Expand ($dict);
+echo $out;
 ?>

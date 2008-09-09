@@ -29,7 +29,6 @@ extern "C" {
 
 #include <string>
 #include "google/template.h"
-#include "google/template_from_string.h"
 #include "google/template_dictionary.h"
 
 using namespace std;
