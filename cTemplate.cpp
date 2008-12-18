@@ -12,6 +12,10 @@
 */
 /* $Header: /home/ncvs/php_extension/cTemplate/cTemplate.cpp,v 1.12 2007/07/17 09:45:59 vanilla Exp $ */
 
+#include <string>
+#include "google/template.h"
+#include "google/template_dictionary.h"
+
 extern "C" {
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -26,10 +30,6 @@ extern "C" {
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
 }
-
-#include <string>
-#include "google/template.h"
-#include "google/template_dictionary.h"
 
 using namespace std;
 using namespace google;
