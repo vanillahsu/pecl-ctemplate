@@ -283,9 +283,9 @@ PHP_METHOD (cTemplateTpl, __construct)
         Template::SetTemplateRootDirectory ("./");
 
         if (ZEND_NUM_ARGS() == 3)
-            tpl->obj = Template::RegisterStringAsTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg3), TC_MANUAL, Z_STRVAL_P (arg2), Z_STRLEN_P (arg2));
+            tpl->obj = Template::StringToTemplate (Z_STRVAL_P (arg2), Z_STRLEN_P( arg2 ), (Strip) Z_LVAL_P (arg3), TC_MANUAL);
         else
-            tpl->obj = Template::RegisterStringAsTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg3), (TemplateContext) Z_LVAL_P (arg4), Z_STRVAL_P (arg2), Z_STRLEN_P (arg2));
+            tpl->obj = Template::StringToTemplate (Z_STRVAL_P (arg2), Z_STRLEN_P( arg2 ), (Strip) Z_LVAL_P (arg3), (TemplateContext) Z_LVAL_P (arg4));
 
         if (tpl->obj == NULL)
         {
