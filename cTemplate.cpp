@@ -265,9 +265,10 @@ PHP_METHOD (cTemplateTpl, __construct)
         if (ZEND_NUM_ARGS() >= 3 && Z_TYPE_P (arg3) == IS_STRING)
             Template::SetTemplateRootDirectory (Z_STRVAL_P (arg3));
 
-        if (ZEND_NUM_ARGS() == 4 && Z_TYPE_P (arg4) == IS_LONG)
-            tpl->obj = Template::GetTemplateWithAutoEscaping (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg2), (TemplateContext) Z_LVAL_P(arg4));
-        else
+        if (ZEND_NUM_ARGS() == 4 && Z_TYPE_P (arg4) == IS_LONG) {
+            php_error( E_STRICT, "deprecated construct function style, use autoescape pragma insteam" );
+            RETURN_FALSE;
+        } else
             tpl->obj = Template::GetTemplate (Z_STRVAL_P (arg1), (Strip) Z_LVAL_P (arg2));
 
         if (tpl->obj == NULL)
