@@ -7,7 +7,7 @@ Make sure that the comment is aligned:
 
 if test "$PHP_CTEMPLATE" != "no"; then
   SEARCH_PATH="/usr/local /usr"
-  SEARCH_FOR="/include/google/template.h"
+  SEARCH_FOR="/include/ctemplate/template.h"
   if test -r $PHP_CTEMPLATE/$SEARCH_FOR; then
     CTEMPLATE_DIR=$PHP_CTEMPLATE
   else

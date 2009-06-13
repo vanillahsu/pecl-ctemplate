@@ -13,8 +13,8 @@
 /* $Header: /home/ncvs/php_extension/cTemplate/cTemplate.cpp,v 1.12 2007/07/17 09:45:59 vanilla Exp $ */
 
 #include <string>
-#include "google/template.h"
-#include "google/template_dictionary.h"
+#include "ctemplate/template.h"
+#include "ctemplate/template_dictionary.h"
 
 extern "C" {
 #ifdef HAVE_CONFIG_H
@@ -32,7 +32,7 @@ extern "C" {
 }
 
 using namespace std;
-using namespace google;
+using namespace ctemplate;
 
 class cTemplateDict
 {
@@ -67,19 +67,24 @@ typedef struct
 
 typedef struct
 {
-    const template_modifiers::TemplateModifier *m;
+    const ctemplate::TemplateModifier *m;
 } minfo;
 
-static minfo m[] = {
-    { &template_modifiers::html_escape },
-    { &template_modifiers::xml_escape },
-    { &template_modifiers::javascript_escape },
-    { &template_modifiers::json_escape },
-    { &template_modifiers::url_query_escape },
-    { &template_modifiers::pre_escape },
-    { &template_modifiers::snippet_escape },
-    { &template_modifiers::validate_url_and_html_escape },
-    { &template_modifiers::validate_url_and_javascript_escape },
+static minfo minfo_[] = {
+    { &ctemplate::html_escape },
+    { &ctemplate::pre_escape },
+    { &ctemplate::snippet_escape },
+    { &ctemplate::cleanse_attribute },
+    { &ctemplate::cleanse_css },
+    { &ctemplate::validate_url_and_html_escape },
+    { &ctemplate::validate_url_and_javascript_escape },
+    { &ctemplate::validate_url_and_css_escape },
+    { &ctemplate::xml_escape },
+    { &ctemplate::javascript_escape },
+    { &ctemplate::javascript_number },
+    { &ctemplate::url_query_escape },
+    { &ctemplate::json_escape },
+    { &ctemplate::prefix_line },
     { NULL }
 };
 
@@ -174,14 +179,20 @@ PHP_MINIT_FUNCTION(cTemplate)
     REGISTER_LONG_CONSTANT ("TC_XML", TC_XML, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("TC_MANUAL", TC_MANUAL, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT ("HTML_ESCAPE", 0, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT ("XML_ESCAPE", 1, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT ("JAVASCRIPT_ESCAPE", 2, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT ("JSON_ESCAPE", 3, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT ("URL_ESCAPE", 4, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT ("PRE_ESCAPE", 5, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT ("SNIPPET_ESCAPE", 6, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT ("VALIDATE_URL_AND_HTML_ESCAPE", 7, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT ("VALIDATE_URL_AND_JAVASCRIPT_ESCAPE", 8, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("PRE_ESCAPE", 1, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("SNIPPET_ESCAPE", 2, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("CLEANSE_ATTRIBUTE", 3, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("CLEANSE_CSS", 4, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("VALIDATE_URL_AND_HTML_ESCAPE", 5, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("VALIDATE_URL_AND_JAVASCRIPT_ESCAPE", 6, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("VALIDATE_URL_AND_CSS_ESCAPE", 7, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("XML_ESCAPE", 8, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("JAVASCRIPT_ESCAPE", 9, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("JAVASCRIPT_NUMBER", 10, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("URL_QUERY_ESCAPE", 11, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("JSON_ESCAPE", 12, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT ("PREFIX_LINE", 13, CONST_CS | CONST_PERSISTENT);
+
 
     cTemplateTpl_init (TSRMLS_C);
     cTemplateDict_init (TSRMLS_C);
@@ -283,10 +294,12 @@ PHP_METHOD (cTemplateTpl, __construct)
         tpl = (php_cTemplateTpl*) zend_object_store_get_object(object TSRMLS_CC);
         Template::SetTemplateRootDirectory ("./");
 
-        if (ZEND_NUM_ARGS() == 3)
-            tpl->obj = Template::StringToTemplate (Z_STRVAL_P (arg2), Z_STRLEN_P( arg2 ), (Strip) Z_LVAL_P (arg3), TC_MANUAL);
-        else
-            tpl->obj = Template::StringToTemplate (Z_STRVAL_P (arg2), Z_STRLEN_P( arg2 ), (Strip) Z_LVAL_P (arg3), (TemplateContext) Z_LVAL_P (arg4));
+        if (ZEND_NUM_ARGS() == 4) {
+            php_error( E_STRICT, "deprecated construct function style, use autoescape pragma instead" );
+            RETURN_FALSE;
+        }
+
+        tpl->obj = Template::StringToTemplate (Z_STRVAL_P (arg2), Z_STRLEN_P( arg2 ), (Strip) Z_LVAL_P (arg3));
 
         if (tpl->obj == NULL)
         {
@@ -677,16 +690,16 @@ PHP_METHOD(cTemplateDict, SetEscaped)
     if (sec != NULL)
     {
         if (dict->obj->is_root)
-            dict->obj->d.SetEscapedValueAndShowSection (key, val, *(m[e].m), sec);
+            dict->obj->d.SetEscapedValueAndShowSection (key, val, *(minfo_[e].m), sec);
         else
-            dict->obj->p->SetEscapedValueAndShowSection (key, val, *(m[e].m), sec);
+            dict->obj->p->SetEscapedValueAndShowSection (key, val, *(minfo_[e].m), sec);
     }
     else
     {
         if (dict->obj->is_root)
-            dict->obj->d.SetEscapedValue (key, val, *(m[e].m));
+            dict->obj->d.SetEscapedValue (key, val, *(minfo_[e].m));
         else
-            dict->obj->p->SetEscapedValue (key, val, *(m[e].m));
+            dict->obj->p->SetEscapedValue (key, val, *(minfo_[e].m));
     }
     RETURN_TRUE;
 }

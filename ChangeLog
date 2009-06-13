@@ -1,3 +1,7 @@
+Version 1.9 (2009/06/13)
+- Make compatible with google cTemplate 0.95.
+- Add more template modifiers define.
+
 Version 1.8 (2009/05/11)
 - Make compatible with google cTemplate 0.94.
 
