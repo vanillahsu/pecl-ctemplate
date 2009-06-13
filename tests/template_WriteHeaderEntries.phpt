@@ -9,7 +9,7 @@ echo $tpl->WriteHeaderEntries();
 ?>
 ===DONE===
 --EXPECTF--
-#include <google/template_string.h>
+#include <ctemplate/template_string.h>
 static const StaticTemplateString ke_NAME = STS_INIT_WITH_HASH(ke_NAME, "NAME", 11433977280339851189LLU);
 static const StaticTemplateString ke_VALUE = STS_INIT_WITH_HASH(ke_VALUE, "VALUE", 3571384048577261229LLU);
 static const StaticTemplateString ke_IN_CA = STS_INIT_WITH_HASH(ke_IN_CA, "IN_CA", 15931064057564334051LLU);

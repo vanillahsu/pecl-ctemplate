@@ -5,6 +5,7 @@ cTemplate: template::from_string & template_context test.
 --FILE--
 <?php
 $a =<<<EOT
+{{%AUTOESCAPE context="HTML"}}
 Hello {{NAME}},
    You have just won $ {{VALUE}}!
    {{#IN_CA}}Well, $ {{TAXED_VALUE}}, after taxes.{{/IN_CA}}
@@ -16,7 +17,7 @@ Hello {{NAME}},
 {{/ONE_RESULT}}
 EOT;
 
-$tpl = new cTemplate ("test", $a, STRIP_BLANK_LINES, TC_HTML);
+$tpl = new cTemplate ("test", $a, STRIP_BLANK_LINES);
 $dict = new cTemplate_Dict ();
 $dict->Set ("NAME", "John Smith");
 $winnings = rand() % 100000;
