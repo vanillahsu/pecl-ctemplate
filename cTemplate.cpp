@@ -1060,8 +1060,7 @@ static zval *cTemplateDict_instance (zend_class_entry *dict_ce, zval *object TSR
 
     Z_TYPE_P(object) = IS_OBJECT;
     object_init_ex(object, dict_ce);
-    object->refcount = 1;
-    object->is_ref = 1;
+    INIT_PZVAL(object);
 
     return object;
 }
