@@ -1,5 +1,6 @@
-Version 1.10 (2010/04/12)
-- Fix build with php-5.3.
+
+Version 1.11 (2011/12/09)
+- Coding style fix.
 
 Version 1.9 (2009/06/13)
 - Make compatible with google cTemplate 0.95.
