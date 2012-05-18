@@ -11,7 +11,7 @@ Hello {{NAME}},
 {{/ONE_RESULT}}
 EOT;
 
-$tpl = new cTemplate ("test", $a, STRIP_BLANK_LINES, TC_HTML);
+$tpl = new cTemplate ("test", $a, STRIP_BLANK_LINES);
 $dict = new cTemplate_Dict ();
 $dict->Set ("NAME", "John Smith");
 $winnings = rand() % 100000;
