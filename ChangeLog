@@ -1,3 +1,7 @@
+Version 1.12 (2015/09/29)
+- Fix build with ctemplate 2.3.
+- remove deprecated functions.
+
 Version 1.11 (2012/05/07)
 - Fix build with php-5.4.
 - Coding style fix.

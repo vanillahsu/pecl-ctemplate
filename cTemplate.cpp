@@ -491,27 +491,6 @@ PHP_METHOD(cTemplateTpl, template_file) {
     RETURN_STRING((char *) tpl->obj->template_file(), 1);
 }
 
-PHP_METHOD(cTemplateTpl, ReloadIfChanged) {
-    php_cTemplateTpl *tpl = NULL;
-    zend_bool b;
-
-    if (ZEND_NUM_ARGS() != 0) {
-        WRONG_PARAM_COUNT;
-    }
-
-    tpl = (php_cTemplateTpl *)zend_object_store_get_object(
-            getThis() TSRMLS_CC);
-    if (tpl->obj == NULL) {
-        zend_throw_exception(zend_exception_get_default(TSRMLS_C),
-                "Template object not exist", 0 TSRMLS_CC);
-        return;
-    }
-
-    b = tpl->obj->ReloadIfChanged();
-
-    RETURN_BOOL(b);
-}
-
 PHP_METHOD(cTemplateTpl, WriteHeaderEntries) {
     php_cTemplateTpl *tpl = NULL;
     string ret;
@@ -656,7 +635,7 @@ PHP_METHOD(cTemplateDict, Set) {
 
 PHP_METHOD(cTemplateDict, SetEscaped) {
     php_cTemplateDict *dict = NULL;
-    const char *key = NULL, *val = NULL, *sec = NULL;
+    const char *key = NULL, *val = NULL;
     int key_len, val_len, sec_len;
     long e;
 
@@ -668,24 +647,15 @@ PHP_METHOD(cTemplateDict, SetEscaped) {
         return;
     }
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl|s",
-                &key, &key_len, &val, &val_len, &e, &sec, &sec_len) == FAILURE)
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl",
+                &key, &key_len, &val, &val_len, &e) == FAILURE)
         RETURN_FALSE;
 
-    if (sec != NULL) {
-        if (dict->obj->is_root) {
-            dict->obj->d.SetEscapedValueAndShowSection(key,
-                    val, *(minfo_[e].m), sec);
-        } else {
-            dict->obj->p->SetEscapedValueAndShowSection(key,
-                    val, *(minfo_[e].m), sec);
-        }
-    } else {
-        if (dict->obj->is_root)
-            dict->obj->d.SetEscapedValue(key, val, *(minfo_[e].m));
-        else
-            dict->obj->p->SetEscapedValue(key, val, *(minfo_[e].m));
-    }
+    if (dict->obj->is_root)
+        dict->obj->d.SetEscapedValue(key, val, *(minfo_[e].m));
+    else
+        dict->obj->p->SetEscapedValue(key, val, *(minfo_[e].m));
+
     RETURN_TRUE;
 }
 
