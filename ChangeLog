@@ -1,3 +1,6 @@
+Version 1.13 (2016/12/01)
+- remove deprecated function (ReloadIfChanged).
+
 Version 1.12 (2015/09/29)
 - Fix build with ctemplate 2.3.
 - remove deprecated functions.

@@ -43,7 +43,6 @@ PHP_METHOD(cTemplateTpl, Dump);
 PHP_METHOD(cTemplateTpl, DumpToString);
 PHP_METHOD(cTemplateTpl, state);
 PHP_METHOD(cTemplateTpl, template_file);
-PHP_METHOD(cTemplateTpl, ReloadIfChanged);
 PHP_METHOD(cTemplateTpl, WriteHeaderEntries);
 PHP_METHOD(cTemplateTpl, __wakeup);
 PHP_METHOD(cTemplateTpl, __sleep);

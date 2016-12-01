@@ -119,7 +119,6 @@ zend_function_entry cTemplateTpl_functions[] = {
     PHP_ME(cTemplateTpl, DumpToString, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateTpl, state, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateTpl, template_file, NULL, ZEND_ACC_PUBLIC)
-    PHP_ME(cTemplateTpl, ReloadIfChanged, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateTpl, WriteHeaderEntries, NULL, ZEND_ACC_PUBLIC)
     PHP_ME(cTemplateTpl, __wakeup, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
     PHP_ME(cTemplateTpl, __sleep, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
@@ -212,15 +211,6 @@ PHP_MINFO_FUNCTION(cTemplate) {
     php_info_print_table_start();
     php_info_print_table_header(2, "cTemplate support", "enabled");
     php_info_print_table_end();
-}
-
-PHP_FUNCTION(cTemplate_reload) {
-    if (ZEND_NUM_ARGS() != 0) {
-        WRONG_PARAM_COUNT;
-    }
-
-    Template::ReloadAllIfChanged();
-    RETURN_TRUE;
 }
 
 PHP_FUNCTION(cTemplate_clearcache) {
