@@ -105,7 +105,6 @@ static void _fill_dict(TemplateDictionary *d, HashTable *val,
         char *secName TSRMLS_DC);
 
 zend_function_entry cTemplate_functions[] = {
-    PHP_FE(cTemplate_reload, NULL)
     PHP_FE(cTemplate_clearcache, NULL)
     PHP_FE(cTemplate_root_directory, NULL)
     PHP_FE(cTemplateDict_SetGlobalValue, NULL)

@@ -32,7 +32,6 @@ PHP_MINIT_FUNCTION(cTemplate);
 PHP_MSHUTDOWN_FUNCTION(cTemplate);
 PHP_MINFO_FUNCTION(cTemplate);
 
-PHP_FUNCTION(cTemplate_reload);
 PHP_FUNCTION(cTemplate_clearcache);
 PHP_FUNCTION(cTemplate_root_directory);
 PHP_FUNCTION(cTemplateDict_SetGlobalValue);
